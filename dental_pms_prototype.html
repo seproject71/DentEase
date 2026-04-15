@@ -1,0 +1,744 @@
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font-sans,system-ui,sans-serif);font-size:14px;color:var(--color-text-primary);background:var(--color-background-tertiary)}
+.app{display:flex;flex-direction:column;min-height:600px}
+.topbar{background:var(--color-background-primary);border-bottom:0.5px solid var(--color-border-tertiary);padding:0 20px;height:52px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:10}
+.topbar-logo{font-size:16px;font-weight:500;color:#185FA5;display:flex;align-items:center;gap:8px}
+.topbar-logo span{font-size:18px}
+.topbar-right{display:flex;align-items:center;gap:16px}
+.avatar{width:32px;height:32px;border-radius:50%;background:#B5D4F4;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:500;color:#0C447C}
+.role-badge{font-size:11px;padding:3px 10px;border-radius:20px;font-weight:500}
+.role-dentist{background:#EAF3DE;color:#3B6D11}
+.role-receptionist{background:#E1F5EE;color:#0F6E56}
+.role-admin{background:#EEEDFE;color:#3C3489}
+.layout{display:flex;flex:1}
+.sidebar{width:200px;background:var(--color-background-primary);border-right:0.5px solid var(--color-border-tertiary);padding:16px 0;flex-shrink:0}
+.sidebar-section{font-size:10px;font-weight:500;color:var(--color-text-tertiary);padding:12px 16px 4px;text-transform:uppercase;letter-spacing:.06em}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 16px;font-size:13px;color:var(--color-text-secondary);cursor:pointer;border-left:2px solid transparent;transition:all .15s}
+.nav-item:hover{background:var(--color-background-secondary);color:var(--color-text-primary)}
+.nav-item.active{background:#E6F1FB;color:#185FA5;border-left-color:#185FA5;font-weight:500}
+.nav-icon{font-size:14px;width:16px;text-align:center}
+.main{flex:1;padding:24px;overflow:auto;background:var(--color-background-tertiary)}
+.page{display:none}
+.page.active{display:block}
+.page-header{margin-bottom:20px}
+.page-title{font-size:18px;font-weight:500;color:var(--color-text-primary)}
+.page-sub{font-size:13px;color:var(--color-text-secondary);margin-top:2px}
+.cards-row{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:20px}
+.metric-card{background:var(--color-background-secondary);border-radius:8px;padding:14px 16px}
+.metric-label{font-size:11px;color:var(--color-text-secondary);margin-bottom:6px;font-weight:500;text-transform:uppercase;letter-spacing:.04em}
+.metric-value{font-size:22px;font-weight:500}
+.metric-change{font-size:11px;margin-top:4px}
+.card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:12px;padding:16px 20px;margin-bottom:16px}
+.card-title{font-size:14px;font-weight:500;margin-bottom:14px;color:var(--color-text-primary)}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.three-col{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{text-align:left;padding:9px 12px;font-weight:500;font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--color-text-secondary);border-bottom:0.5px solid var(--color-border-tertiary)}
+td{padding:9px 12px;border-bottom:0.5px solid var(--color-border-tertiary);color:var(--color-text-primary)}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:var(--color-background-secondary)}
+.badge{display:inline-block;font-size:11px;padding:2px 8px;border-radius:20px;font-weight:500}
+.badge-green{background:#EAF3DE;color:#3B6D11}
+.badge-amber{background:#FAEEDA;color:#854F0B}
+.badge-red{background:#FCEBEB;color:#A32D2D}
+.badge-blue{background:#E6F1FB;color:#185FA5}
+.badge-gray{background:#F1EFE8;color:#5F5E5A}
+label{display:block;font-size:12px;font-weight:500;color:var(--color-text-secondary);margin-bottom:5px}
+input,select,textarea{width:100%;border:0.5px solid var(--color-border-secondary);border-radius:8px;padding:8px 10px;font-size:13px;background:var(--color-background-primary);color:var(--color-text-primary);outline:none}
+input:focus,select:focus{border-color:#378ADD;box-shadow:0 0 0 2px rgba(55,138,221,.15)}
+.form-group{margin-bottom:12px}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;border:0.5px solid var(--color-border-secondary);background:var(--color-background-primary);color:var(--color-text-primary);transition:all .15s}
+.btn:hover{background:var(--color-background-secondary)}
+.btn-primary{background:#185FA5;color:#fff;border-color:#185FA5}
+.btn-primary:hover{background:#0C447C;border-color:#0C447C}
+.btn-sm{padding:5px 12px;font-size:12px}
+.btn-danger{background:#FCEBEB;color:#A32D2D;border-color:#F7C1C1}
+.section-tabs{display:flex;gap:0;border-bottom:0.5px solid var(--color-border-tertiary);margin-bottom:16px}
+.tab{padding:8px 16px;font-size:13px;cursor:pointer;color:var(--color-text-secondary);border-bottom:2px solid transparent;margin-bottom:-0.5px}
+.tab.active{color:#185FA5;border-bottom-color:#185FA5;font-weight:500}
+.login-wrap{min-height:580px;display:flex;align-items:center;justify-content:center;background:var(--color-background-tertiary)}
+.login-card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:16px;padding:36px 32px;width:380px}
+.login-logo{text-align:center;margin-bottom:28px}
+.login-logo-icon{font-size:28px;margin-bottom:6px}
+.login-logo-title{font-size:18px;font-weight:500;color:#185FA5}
+.login-logo-sub{font-size:12px;color:var(--color-text-secondary);margin-top:2px}
+.role-selector{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:20px}
+.role-opt{text-align:center;padding:10px 6px;border:0.5px solid var(--color-border-tertiary);border-radius:10px;cursor:pointer;transition:all .15s}
+.role-opt:hover{border-color:#378ADD;background:#E6F1FB}
+.role-opt.selected{border-color:#185FA5;background:#E6F1FB}
+.role-opt-icon{font-size:18px;margin-bottom:4px}
+.role-opt-label{font-size:11px;font-weight:500;color:var(--color-text-secondary)}
+.role-opt.selected .role-opt-label{color:#185FA5}
+.odontogram{display:flex;flex-direction:column;gap:8px;align-items:center;padding:16px}
+.teeth-row{display:flex;gap:4px}
+.tooth{width:28px;height:36px;border:1.5px solid var(--color-border-secondary);border-radius:6px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:9px;color:var(--color-text-secondary);position:relative;background:var(--color-background-primary);transition:all .15s}
+.tooth:hover{border-color:#185FA5;background:#E6F1FB}
+.tooth.treated{background:#C0DD97;border-color:#639922;color:#27500A}
+.tooth.crown{background:#FAC775;border-color:#BA7517;color:#633806}
+.tooth.missing{background:#F1EFE8;border-color:#B4B2A9;color:#888780}
+.tooth.root-canal{background:#F5C4B3;border-color:#D85A30;color:#4A1B0C}
+.tooth-label{font-size:9px;text-align:center;color:var(--color-text-secondary);margin-top:2px}
+.teeth-arch{font-size:10px;color:var(--color-text-secondary);text-align:center;padding:2px 0}
+.chart-bar-wrap{display:flex;flex-direction:column;gap:8px}
+.chart-bar-row{display:flex;align-items:center;gap:10px;font-size:12px}
+.chart-bar-label{width:60px;color:var(--color-text-secondary);text-align:right}
+.chart-bar-bg{flex:1;background:var(--color-background-secondary);border-radius:4px;height:18px;overflow:hidden}
+.chart-bar-fill{height:100%;border-radius:4px;display:flex;align-items:center;padding-left:8px;font-size:11px;font-weight:500;color:#fff}
+.chart-bar-val{width:40px;color:var(--color-text-primary);font-weight:500}
+.mini-calendar{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;font-size:11px}
+.cal-hdr{text-align:center;padding:4px 0;color:var(--color-text-secondary);font-weight:500}
+.cal-day{text-align:center;padding:5px 2px;border-radius:6px;cursor:pointer;color:var(--color-text-primary)}
+.cal-day:hover{background:var(--color-background-secondary)}
+.cal-day.today{background:#185FA5;color:#fff;font-weight:500}
+.cal-day.has-appt{position:relative}
+.cal-day.has-appt::after{content:'';position:absolute;bottom:2px;left:50%;transform:translateX(-50%);width:4px;height:4px;border-radius:50%;background:#378ADD}
+.appt-slot{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;background:var(--color-background-secondary);margin-bottom:6px;font-size:12px}
+.appt-time{font-weight:500;width:50px;color:var(--color-text-primary)}
+.appt-info{flex:1}
+.appt-name{font-weight:500;color:var(--color-text-primary)}
+.appt-type{color:var(--color-text-secondary)}
+.progress-bar{height:6px;background:var(--color-background-secondary);border-radius:3px;overflow:hidden;margin-top:6px}
+.progress-fill{height:100%;border-radius:3px}
+.search-bar{display:flex;gap:8px;margin-bottom:16px}
+.search-bar input{flex:1}
+.stat-row{display:flex;gap:12px;margin-bottom:16px}
+.stat-item{flex:1;background:var(--color-background-secondary);border-radius:8px;padding:12px;text-align:center}
+.stat-num{font-size:20px;font-weight:500;color:var(--color-text-primary)}
+.stat-lbl{font-size:11px;color:var(--color-text-secondary);margin-top:2px}
+.screen-nav{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px;padding:16px 20px;background:var(--color-background-primary);border-radius:12px;border:0.5px solid var(--color-border-tertiary)}
+.screen-nav-btn{padding:6px 14px;border-radius:8px;font-size:12px;font-weight:500;cursor:pointer;border:0.5px solid var(--color-border-secondary);color:var(--color-text-secondary);background:var(--color-background-primary);transition:all .15s}
+.screen-nav-btn:hover{background:var(--color-background-secondary)}
+.screen-nav-btn.active{background:#185FA5;color:#fff;border-color:#185FA5}
+.divider{height:0.5px;background:var(--color-border-tertiary);margin:12px 0}
+.alert-box{padding:10px 14px;border-radius:8px;font-size:12px;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.alert-warning{background:#FAEEDA;color:#854F0B;border:0.5px solid #FAC775}
+.alert-info{background:#E6F1FB;color:#185FA5;border:0.5px solid #B5D4F4}
+.prescription-item{display:flex;align-items:center;gap:10px;padding:8px 12px;background:var(--color-background-secondary);border-radius:8px;margin-bottom:6px;font-size:13px}
+.rx-name{flex:1;font-weight:500}
+.rx-dose{color:var(--color-text-secondary);font-size:12px}
+.user-row{display:flex;align-items:center;gap:12px;padding:10px 12px;border-bottom:0.5px solid var(--color-border-tertiary)}
+.user-avatar{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:500;flex-shrink:0}
+.ua-blue{background:#B5D4F4;color:#0C447C}
+.ua-green{background:#C0DD97;color:#27500A}
+.ua-purple{background:#CECBF6;color:#3C3489}
+</style>
+
+<h2 class="sr-only">Dental Clinic Patient Management System — High-Fidelity UI Prototype with Login, Receptionist, Dentist, and Admin screens</h2>
+
+<div class="app" id="app">
+
+<div id="login-screen" class="login-wrap">
+  <div class="login-card">
+    <div class="login-logo">
+      <div class="login-logo-icon">🦷</div>
+      <div class="login-logo-title">DentalCare PMS</div>
+      <div class="login-logo-sub">A. Nagar Dental & Implant Center</div>
+    </div>
+    <div style="font-size:12px;font-weight:500;color:var(--color-text-secondary);margin-bottom:8px">Sign in as</div>
+    <div class="role-selector" id="roleSelector">
+      <div class="role-opt selected" data-role="receptionist" onclick="selectRole(this)">
+        <div class="role-opt-icon">🗂️</div>
+        <div class="role-opt-label">Receptionist</div>
+      </div>
+      <div class="role-opt" data-role="dentist" onclick="selectRole(this)">
+        <div class="role-opt-icon">🦷</div>
+        <div class="role-opt-label">Dentist</div>
+      </div>
+      <div class="role-opt" data-role="admin" onclick="selectRole(this)">
+        <div class="role-opt-icon">⚙️</div>
+        <div class="role-opt-label">Admin</div>
+      </div>
+    </div>
+    <div class="form-group"><label>Email address</label><input type="email" value="staff@dentalcare.in" /></div>
+    <div class="form-group"><label>Password</label><input type="password" value="••••••••" /></div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+      <label style="display:flex;align-items:center;gap:6px;margin:0;font-size:12px;color:var(--color-text-secondary);cursor:pointer"><input type="checkbox" style="width:auto" checked /> Remember me</label>
+      <span style="font-size:12px;color:#185FA5;cursor:pointer">Forgot password?</span>
+    </div>
+    <button class="btn btn-primary" style="width:100%;justify-content:center" onclick="doLogin()">Sign In →</button>
+    <div style="text-align:center;margin-top:16px;font-size:11px;color:var(--color-text-tertiary)">Secured with JWT · AES-256 encryption</div>
+  </div>
+</div>
+
+<div id="main-app" style="display:none;flex-direction:column;min-height:600px">
+  <div class="topbar">
+    <div class="topbar-logo"><span>🦷</span> DentalCare PMS</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button class="screen-nav-btn active" id="sn-receptionist" onclick="switchDashboard('receptionist')">Receptionist</button>
+      <button class="screen-nav-btn" id="sn-dentist" onclick="switchDashboard('dentist')">Dentist</button>
+      <button class="screen-nav-btn" id="sn-admin" onclick="switchDashboard('admin')">Admin</button>
+    </div>
+    <div class="topbar-right">
+      <span class="role-badge role-receptionist" id="topRoleBadge">Receptionist</span>
+      <div class="avatar" id="topAvatar">SR</div>
+    </div>
+  </div>
+
+  <div class="layout" style="flex:1">
+
+    <div class="sidebar" id="sidebar">
+      <div id="sidebar-content"></div>
+    </div>
+
+    <div class="main">
+
+      <div id="dash-receptionist" class="page active">
+        <div id="rec-content"></div>
+      </div>
+
+      <div id="dash-dentist" class="page">
+        <div id="dent-content"></div>
+      </div>
+
+      <div id="dash-admin" class="page">
+        <div id="admin-content"></div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+</div>
+
+<script>
+var currentDash = 'receptionist';
+var currentRecTab = 'overview';
+var currentDentTab = 'patients';
+var currentAdminTab = 'users';
+var selectedRole = 'receptionist';
+
+function selectRole(el){
+  document.querySelectorAll('.role-opt').forEach(e=>e.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedRole = el.dataset.role;
+}
+
+function doLogin(){
+  document.getElementById('login-screen').style.display='none';
+  document.getElementById('main-app').style.display='flex';
+  switchDashboard(selectedRole);
+}
+
+var sidebars = {
+  receptionist:[
+    {section:'Main'},
+    {icon:'📊',label:'Overview',tab:'overview'},
+    {icon:'👤',label:'Register Patient',tab:'register'},
+    {icon:'📋',label:'Patient List',tab:'patients'},
+    {icon:'📅',label:'Appointments',tab:'calendar'},
+    {icon:'💳',label:'Billing',tab:'billing'},
+    {section:'Support'},
+    {icon:'⚙️',label:'Settings',tab:''},
+  ],
+  dentist:[
+    {section:'Clinical'},
+    {icon:'🔍',label:'Patient Records',tab:'patients'},
+    {icon:'🏥',label:'Clinical History',tab:'history'},
+    {icon:'📝',label:'Treatment Entry',tab:'treatment'},
+    {icon:'🦷',label:'Odontogram',tab:'odontogram'},
+    {icon:'💊',label:'Prescriptions',tab:'prescriptions'},
+    {section:'Support'},
+    {icon:'⚙️',label:'Settings',tab:''},
+  ],
+  admin:[
+    {section:'Management'},
+    {icon:'📊',label:'Analytics',tab:'analytics'},
+    {icon:'👥',label:'Manage Users',tab:'users'},
+    {icon:'💰',label:'Revenue',tab:'revenue'},
+    {icon:'📋',label:'Audit Log',tab:''},
+    {section:'System'},
+    {icon:'⚙️',label:'Settings',tab:''},
+  ]
+};
+
+var roleInfo = {
+  receptionist:{badge:'role-receptionist',label:'Receptionist',avatar:'SR'},
+  dentist:{badge:'role-dentist',label:'Dentist',avatar:'DR'},
+  admin:{badge:'role-admin',label:'Admin',avatar:'AD'}
+};
+
+function buildSidebar(role){
+  var items = sidebars[role];
+  var activeTab = role==='receptionist'?currentRecTab:(role==='dentist'?currentDentTab:currentAdminTab);
+  var html='';
+  items.forEach(function(it){
+    if(it.section){html+='<div class="sidebar-section">'+it.section+'</div>';}
+    else{
+      var ac=it.tab&&it.tab===activeTab?' active':'';
+      html+='<div class="nav-item'+ac+'" onclick="switchTab(\''+role+'\',\''+it.tab+'\')"><span class="nav-icon">'+it.icon+'</span>'+it.label+'</div>';
+    }
+  });
+  document.getElementById('sidebar-content').innerHTML=html;
+}
+
+function switchDashboard(role){
+  currentDash=role;
+  ['receptionist','dentist','admin'].forEach(function(r){
+    document.getElementById('dash-'+r).classList.toggle('active',r===role);
+    document.getElementById('sn-'+r).classList.toggle('active',r===role);
+  });
+  var ri=roleInfo[role];
+  document.getElementById('topRoleBadge').className='role-badge role-'+role;
+  document.getElementById('topRoleBadge').textContent=ri.label;
+  document.getElementById('topAvatar').textContent=ri.avatar;
+  buildSidebar(role);
+  renderDash(role);
+}
+
+function switchTab(role,tab){
+  if(!tab)return;
+  if(role==='receptionist')currentRecTab=tab;
+  else if(role==='dentist')currentDentTab=tab;
+  else currentAdminTab=tab;
+  buildSidebar(role);
+  renderDash(role);
+}
+
+function renderDash(role){
+  if(role==='receptionist')renderReceptionist();
+  else if(role==='dentist')renderDentist();
+  else renderAdmin();
+}
+
+var patients=[
+  {id:'P001',name:'Meera Sharma',age:34,phone:'9876543210',condition:'Root Canal',doctor:'Dr. Kulkarni',date:'10 Apr 2026',status:'Completed',bill:'₹8,500',paid:'₹8,500',balance:'₹0'},
+  {id:'P002',name:'Rahul Patil',age:28,phone:'9823456789',condition:'Scaling',doctor:'Dr. Kulkarni',date:'10 Apr 2026',status:'Upcoming',bill:'₹1,200',paid:'₹0',balance:'₹1,200'},
+  {id:'P003',name:'Sunita Joshi',age:45,phone:'9765432109',condition:'Extraction',doctor:'Dr. Nair',date:'09 Apr 2026',status:'In Progress',bill:'₹3,000',paid:'₹1,500',balance:'₹1,500'},
+  {id:'P004',name:'Amit Desai',age:52,phone:'9812345678',condition:'Crown Fitting',doctor:'Dr. Kulkarni',date:'08 Apr 2026',status:'Completed',bill:'₹12,000',paid:'₹12,000',balance:'₹0'},
+  {id:'P005',name:'Priya Nair',age:22,phone:'9834567890',condition:'Braces',doctor:'Dr. Nair',date:'07 Apr 2026',status:'Upcoming',bill:'₹35,000',paid:'₹10,000',balance:'₹25,000'},
+];
+
+function renderReceptionist(){
+  var tab=currentRecTab;
+  var html='';
+  if(tab==='overview'){
+    html=`<div class="page-header"><div class="page-title">Front Desk Overview</div><div class="page-sub">Friday, 10 April 2026</div></div>
+    <div class="cards-row">
+      <div class="metric-card"><div class="metric-label">Today's Patients</div><div class="metric-value">12</div><div class="metric-change" style="color:#3B6D11">↑ 3 from yesterday</div></div>
+      <div class="metric-card"><div class="metric-label">Appointments</div><div class="metric-value">8</div><div class="metric-change" style="color:var(--color-text-secondary)">2 pending confirmation</div></div>
+      <div class="metric-card"><div class="metric-label">Today's Revenue</div><div class="metric-value">₹24,500</div><div class="metric-change" style="color:#3B6D11">↑ 12% vs last Fri</div></div>
+      <div class="metric-card"><div class="metric-label">Outstanding</div><div class="metric-value">₹26,700</div><div class="metric-change" style="color:#A32D2D">5 invoices due</div></div>
+    </div>
+    <div class="two-col">
+      <div class="card"><div class="card-title">Today's Appointments</div>
+        <div class="appt-slot"><div class="appt-time">9:00 AM</div><div class="appt-info"><div class="appt-name">Meera Sharma</div><div class="appt-type">Root Canal · Dr. Kulkarni</div></div><span class="badge badge-green">Done</span></div>
+        <div class="appt-slot"><div class="appt-time">10:30 AM</div><div class="appt-info"><div class="appt-name">Rahul Patil</div><div class="appt-type">Scaling · Dr. Kulkarni</div></div><span class="badge badge-blue">Now</span></div>
+        <div class="appt-slot"><div class="appt-time">12:00 PM</div><div class="appt-info"><div class="appt-name">Sunita Joshi</div><div class="appt-type">Extraction · Dr. Nair</div></div><span class="badge badge-amber">Waiting</span></div>
+        <div class="appt-slot"><div class="appt-time">2:30 PM</div><div class="appt-info"><div class="appt-name">Amit Desai</div><div class="appt-type">Crown Check · Dr. Kulkarni</div></div><span class="badge badge-gray">Scheduled</span></div>
+      </div>
+      <div class="card"><div class="card-title">Quick Stats</div>
+        <div class="chart-bar-wrap">
+          <div class="chart-bar-row"><div class="chart-bar-label">Mon</div><div class="chart-bar-bg"><div class="chart-bar-fill" style="width:65%;background:#378ADD">9</div></div><div class="chart-bar-val">9</div></div>
+          <div class="chart-bar-row"><div class="chart-bar-label">Tue</div><div class="chart-bar-bg"><div class="chart-bar-fill" style="width:50%;background:#378ADD">7</div></div><div class="chart-bar-val">7</div></div>
+          <div class="chart-bar-row"><div class="chart-bar-label">Wed</div><div class="chart-bar-bg"><div class="chart-bar-fill" style="width:85%;background:#185FA5">12</div></div><div class="chart-bar-val">12</div></div>
+          <div class="chart-bar-row"><div class="chart-bar-label">Thu</div><div class="chart-bar-bg"><div class="chart-bar-fill" style="width:64%;background:#378ADD">9</div></div><div class="chart-bar-val">9</div></div>
+          <div class="chart-bar-row"><div class="chart-bar-label">Fri</div><div class="chart-bar-bg"><div class="chart-bar-fill" style="width:85%;background:#185FA5">12</div></div><div class="chart-bar-val">12</div></div>
+        </div>
+        <div class="divider"></div>
+        <div style="font-size:12px;color:var(--color-text-secondary)">Patients this week: <strong style="color:var(--color-text-primary)">49</strong></div>
+      </div>
+    </div>`;
+  } else if(tab==='register'){
+    html=`<div class="page-header"><div class="page-title">Register New Patient</div><div class="page-sub">Fill in patient demographics and medical history</div></div>
+    <div class="card">
+      <div class="card-title">Personal Information</div>
+      <div class="three-col">
+        <div class="form-group"><label>Full Name *</label><input type="text" placeholder="e.g. Rahul Sharma" /></div>
+        <div class="form-group"><label>Phone Number *</label><input type="tel" placeholder="Primary key — 10 digits" /></div>
+        <div class="form-group"><label>Age *</label><input type="number" placeholder="0–120" min="0" max="120" /></div>
+      </div>
+      <div class="three-col">
+        <div class="form-group"><label>Gender</label><select><option>Male</option><option>Female</option><option>Other</option></select></div>
+        <div class="form-group"><label>Date of Birth</label><input type="date" /></div>
+        <div class="form-group"><label>Blood Group</label><select><option>A+</option><option>A-</option><option>B+</option><option>B-</option><option>O+</option><option>O-</option><option>AB+</option><option>AB-</option></select></div>
+      </div>
+      <div class="form-group"><label>Address</label><input type="text" placeholder="Street, City, PIN" /></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Medical History & Alerts</div>
+      <div class="alert-box alert-warning">⚠ Medical history tags affect safety alerts during treatment — verify with patient carefully.</div>
+      <div class="two-col">
+        <div>
+          <div class="form-group"><label>Known Allergies</label><input type="text" placeholder="e.g. Penicillin, Latex" /></div>
+          <div class="form-group"><label>Current Medications</label><textarea style="height:60px;resize:none" placeholder="List ongoing medications..."></textarea></div>
+        </div>
+        <div>
+          <div class="form-group"><label>Existing Conditions</label>
+            <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:4px">
+              ${['Diabetes','Hypertension','Heart Disease','Asthma','Bleeding Disorder','Pregnancy'].map(c=>`<label style="display:flex;align-items:center;gap:4px;font-size:12px;font-weight:400;margin-bottom:0;cursor:pointer"><input type="checkbox" style="width:auto" /> ${c}</label>`).join('')}
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="form-group"><label>Referring Doctor / Source</label><input type="text" placeholder="Referred by..." /></div>
+    </div>
+    <div style="display:flex;gap:10px">
+      <button class="btn btn-primary">Save Patient Record</button>
+      <button class="btn">Clear Form</button>
+    </div>`;
+  } else if(tab==='patients'){
+    html=`<div class="page-header"><div class="page-title">Patient List</div><div class="page-sub">All registered patients — search by name or phone</div></div>
+    <div class="search-bar"><input type="text" placeholder="Search by name, phone, or patient ID..." /><button class="btn btn-primary btn-sm">Search</button><button class="btn btn-sm">+ New Patient</button></div>
+    <div class="card" style="padding:0;overflow:hidden">
+      <table>
+        <thead><tr><th>Patient ID</th><th>Name</th><th>Age</th><th>Phone</th><th>Last Visit</th><th>Doctor</th><th>Condition</th><th>Status</th><th>Action</th></tr></thead>
+        <tbody>
+          ${patients.map(p=>`<tr>
+            <td style="color:#185FA5;font-weight:500">${p.id}</td>
+            <td style="font-weight:500">${p.name}</td>
+            <td>${p.age}</td>
+            <td>${p.phone}</td>
+            <td>${p.date}</td>
+            <td>${p.doctor}</td>
+            <td>${p.condition}</td>
+            <td><span class="badge ${p.status==='Completed'?'badge-green':p.status==='Upcoming'?'badge-blue':p.status==='In Progress'?'badge-amber':'badge-gray'}">${p.status}</span></td>
+            <td><button class="btn btn-sm">View</button></td>
+          </tr>`).join('')}
+        </tbody>
+      </table>
+    </div>`;
+  } else if(tab==='calendar'){
+    html=`<div class="page-header"><div class="page-title">Appointment Scheduling</div><div class="page-sub">April 2026</div></div>
+    <div class="two-col">
+      <div class="card"><div class="card-title">April 2026</div>
+        <div class="mini-calendar">
+          ${['Su','Mo','Tu','We','Th','Fr','Sa'].map(d=>`<div class="cal-hdr">${d}</div>`).join('')}
+          ${['',' ','',''].join('')}
+          ${[...Array(3)].map((_,i)=>`<div class="cal-day"></div>`).join('')}
+          ${[...Array(30)].map((_,i)=>{
+            var d=i+1;
+            var cls='cal-day';
+            if(d===10)cls+=' today';
+            if([7,9,10,14,16,21,23,24].includes(d))cls+=' has-appt';
+            return `<div class="${cls}">${d}</div>`;
+          }).join('')}
+        </div>
+        <div class="divider"></div>
+        <div class="form-group" style="margin-bottom:8px"><label>Book New Appointment</label>
+          <input type="text" placeholder="Patient name or phone" style="margin-bottom:6px" />
+          <select style="margin-bottom:6px"><option>Dr. Kulkarni</option><option>Dr. Nair</option></select>
+          <input type="datetime-local" style="margin-bottom:6px" />
+          <select style="margin-bottom:6px"><option>Consultation</option><option>Root Canal</option><option>Extraction</option><option>Scaling</option><option>Crown</option><option>Braces</option></select>
+          <button class="btn btn-primary btn-sm" style="width:100%;justify-content:center">Book Appointment</button>
+        </div>
+      </div>
+      <div class="card"><div class="card-title">Today — 10 April 2026</div>
+        <div class="appt-slot"><div class="appt-time">9:00 AM</div><div class="appt-info"><div class="appt-name">Meera Sharma</div><div class="appt-type">Root Canal · 60 min</div></div><span class="badge badge-green">Done</span></div>
+        <div class="appt-slot" style="background:#E6F1FB"><div class="appt-time">10:30 AM</div><div class="appt-info"><div class="appt-name">Rahul Patil</div><div class="appt-type">Scaling · 30 min</div></div><span class="badge badge-blue">Active</span></div>
+        <div class="appt-slot"><div class="appt-time">12:00 PM</div><div class="appt-info"><div class="appt-name">Sunita Joshi</div><div class="appt-type">Extraction · 45 min</div></div><span class="badge badge-amber">Waiting</span></div>
+        <div class="appt-slot"><div class="appt-time">2:30 PM</div><div class="appt-info"><div class="appt-name">Amit Desai</div><div class="appt-type">Crown Check · 30 min</div></div><span class="badge badge-gray">Scheduled</span></div>
+        <div class="appt-slot"><div class="appt-time">4:00 PM</div><div class="appt-info"><div class="appt-name">Priya Nair</div><div class="appt-type">Braces Adjustment · 45 min</div></div><span class="badge badge-gray">Scheduled</span></div>
+      </div>
+    </div>`;
+  } else if(tab==='billing'){
+    html=`<div class="page-header"><div class="page-title">Billing & Invoices</div><div class="page-sub">Track payments and generate invoices</div></div>
+    <div class="cards-row">
+      <div class="metric-card"><div class="metric-label">Total Billed (Apr)</div><div class="metric-value">₹59,700</div></div>
+      <div class="metric-card"><div class="metric-label">Collected</div><div class="metric-value" style="color:#3B6D11">₹33,000</div></div>
+      <div class="metric-card"><div class="metric-label">Outstanding</div><div class="metric-value" style="color:#A32D2D">₹26,700</div></div>
+      <div class="metric-card"><div class="metric-label">Invoices</div><div class="metric-value">5</div></div>
+    </div>
+    <div class="card" style="padding:0;overflow:hidden">
+      <div style="padding:14px 20px 10px;display:flex;justify-content:space-between;align-items:center">
+        <div style="font-size:14px;font-weight:500">Invoice List</div>
+        <button class="btn btn-primary btn-sm">+ Generate Invoice</button>
+      </div>
+      <table>
+        <thead><tr><th>Invoice #</th><th>Patient</th><th>Procedure</th><th>Total</th><th>Paid</th><th>Balance</th><th>Status</th><th>Action</th></tr></thead>
+        <tbody>
+          ${patients.map((p,i)=>`<tr>
+            <td style="color:#185FA5;font-weight:500">INV-${2026+i}</td>
+            <td style="font-weight:500">${p.name}</td>
+            <td>${p.condition}</td>
+            <td>${p.bill}</td>
+            <td style="color:#3B6D11">${p.paid}</td>
+            <td style="color:${p.balance==='₹0'?'var(--color-text-secondary)':'#A32D2D'}">${p.balance}</td>
+            <td><span class="badge ${p.balance==='₹0'?'badge-green':'badge-amber'}">${p.balance==='₹0'?'Paid':'Balance Due'}</span></td>
+            <td style="display:flex;gap:4px"><button class="btn btn-sm">Print</button></td>
+          </tr>`).join('')}
+        </tbody>
+      </table>
+    </div>`;
+  }
+  document.getElementById('rec-content').innerHTML=html;
+}
+
+function renderDentist(){
+  var tab=currentDentTab;
+  var html='';
+  if(tab==='patients'){
+    html=`<div class="page-header"><div class="page-title">Patient Records</div><div class="page-sub">Search and access patient clinical records</div></div>
+    <div class="search-bar"><input type="text" placeholder="Search patient by name or phone..." /><button class="btn btn-primary btn-sm">Search</button></div>
+    <div class="two-col">
+      ${patients.map(p=>`<div class="card" style="padding:14px 16px">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start">
+          <div style="display:flex;gap:10px;align-items:center">
+            <div style="width:38px;height:38px;border-radius:50%;background:#B5D4F4;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:500;color:#0C447C;flex-shrink:0">${p.name.split(' ').map(n=>n[0]).join('')}</div>
+            <div><div style="font-weight:500;font-size:14px">${p.name}</div><div style="font-size:12px;color:var(--color-text-secondary)">${p.id} · Age ${p.age}</div></div>
+          </div>
+          <span class="badge ${p.status==='Completed'?'badge-green':p.status==='Upcoming'?'badge-blue':'badge-amber'}">${p.status}</span>
+        </div>
+        <div class="divider"></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:12px">
+          <div><span style="color:var(--color-text-secondary)">Condition: </span>${p.condition}</div>
+          <div><span style="color:var(--color-text-secondary)">Doctor: </span>${p.doctor}</div>
+          <div><span style="color:var(--color-text-secondary)">Phone: </span>${p.phone}</div>
+          <div><span style="color:var(--color-text-secondary)">Last Visit: </span>${p.date}</div>
+        </div>
+        <div style="margin-top:10px;display:flex;gap:6px">
+          <button class="btn btn-primary btn-sm">Open Record</button>
+          <button class="btn btn-sm">History</button>
+        </div>
+      </div>`).join('')}
+    </div>`;
+  } else if(tab==='history'){
+    html=`<div class="page-header"><div class="page-title">Clinical History</div><div class="page-sub">Meera Sharma — P001</div></div>
+    <div class="alert-box alert-warning">⚠ Allergy alert: Penicillin · Condition: Hypertension</div>
+    <div class="two-col">
+      <div>
+        <div class="card"><div class="card-title">Patient Info</div>
+          <div style="display:flex;gap:12px;align-items:center;margin-bottom:12px">
+            <div style="width:44px;height:44px;border-radius:50%;background:#B5D4F4;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:500;color:#0C447C">MS</div>
+            <div><div style="font-weight:500">Meera Sharma</div><div style="font-size:12px;color:var(--color-text-secondary)">34 yrs · Female · A+</div></div>
+          </div>
+          <div style="font-size:12px;display:flex;flex-direction:column;gap:5px">
+            <div style="display:flex;justify-content:space-between"><span style="color:var(--color-text-secondary)">Phone</span><span>9876543210</span></div>
+            <div style="display:flex;justify-content:space-between"><span style="color:var(--color-text-secondary)">Last Visit</span><span>10 Apr 2026</span></div>
+            <div style="display:flex;justify-content:space-between"><span style="color:var(--color-text-secondary)">Assigned Doctor</span><span>Dr. Kulkarni</span></div>
+            <div style="display:flex;justify-content:space-between"><span style="color:var(--color-text-secondary)">Total Visits</span><span>6</span></div>
+          </div>
+        </div>
+        <div class="card"><div class="card-title">Medical Alerts</div>
+          <div style="display:flex;flex-wrap:wrap;gap:6px">
+            <span class="badge badge-red">Penicillin Allergy</span>
+            <span class="badge badge-amber">Hypertension</span>
+            <span class="badge badge-amber">On Blood Thinners</span>
+          </div>
+        </div>
+      </div>
+      <div class="card"><div class="card-title">Treatment History</div>
+        ${[
+          {date:'10 Apr 2026',proc:'Root Canal — Tooth #26',doc:'Dr. Kulkarni',note:'Completed. No complications.'},
+          {date:'14 Feb 2026',proc:'Scaling & Polishing',doc:'Dr. Kulkarni',note:'Mild sensitivity post-treatment.'},
+          {date:'03 Nov 2025',proc:'Filling — Tooth #14',doc:'Dr. Nair',note:'Composite resin filling placed.'},
+          {date:'21 Jul 2025',proc:'X-ray (OPG)',doc:'Dr. Kulkarni',note:'No major pathology noted.'},
+        ].map(h=>`<div style="padding:10px 0;border-bottom:0.5px solid var(--color-border-tertiary)">
+          <div style="display:flex;justify-content:space-between;margin-bottom:3px">
+            <div style="font-weight:500;font-size:13px">${h.proc}</div>
+            <div style="font-size:11px;color:var(--color-text-secondary)">${h.date}</div>
+          </div>
+          <div style="font-size:12px;color:var(--color-text-secondary)">${h.doc} · ${h.note}</div>
+        </div>`).join('')}
+      </div>
+    </div>`;
+  } else if(tab==='treatment'){
+    html=`<div class="page-header"><div class="page-title">Treatment Entry</div><div class="page-sub">Record today's treatment for selected patient</div></div>
+    <div class="two-col">
+      <div class="card"><div class="card-title">Session Details</div>
+        <div class="form-group"><label>Patient</label><select><option>Meera Sharma (P001)</option><option>Rahul Patil (P002)</option><option>Sunita Joshi (P003)</option></select></div>
+        <div class="form-group"><label>Date</label><input type="date" value="2026-04-10" /></div>
+        <div class="form-group"><label>Tooth Number(s)</label><input type="text" placeholder="e.g. 26, 27" /></div>
+        <div class="form-group"><label>Procedure Type</label><select><option>Root Canal Treatment</option><option>Extraction</option><option>Filling</option><option>Crown</option><option>Scaling</option><option>Implant</option><option>Braces Adjustment</option></select></div>
+        <div class="form-group"><label>Treatment Notes</label><textarea style="height:80px;resize:none" placeholder="Describe the procedure performed, observations, complications...">Pulp chamber accessed. Canals measured with apex locator. Biomechanical preparation completed. Calcium hydroxide dressing placed.</textarea></div>
+        <div class="form-group"><label>Follow-up Required</label><select><option>Yes — 1 week</option><option>Yes — 2 weeks</option><option>No follow-up</option></select></div>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-primary">Save Treatment</button>
+          <button class="btn">Generate Prescription</button>
+        </div>
+      </div>
+      <div class="card"><div class="card-title">Cost Entry</div>
+        <div class="form-group"><label>Procedure Cost (₹)</label><input type="number" value="8500" /></div>
+        <div class="form-group"><label>Discount (₹)</label><input type="number" value="0" /></div>
+        <div class="form-group"><label>Net Amount (₹)</label><input type="number" value="8500" /></div>
+        <div class="divider"></div>
+        <div class="form-group"><label>Chief Complaint</label><textarea style="height:60px;resize:none" placeholder="Patient's complaint...">Severe toothache in lower left region since 3 days.</textarea></div>
+        <div class="form-group"><label>Clinical Findings</label><textarea style="height:60px;resize:none" placeholder="Examination findings...">Tooth #26 — deep caries, positive to percussion, tender on palpation.</textarea></div>
+      </div>
+    </div>`;
+  } else if(tab==='odontogram'){
+    var upper=[18,17,16,15,14,13,12,11,21,22,23,24,25,26,27,28];
+    var lower=[48,47,46,45,44,43,42,41,31,32,33,34,35,36,37,38];
+    var treated=[26,27,14];var crown=[16];var missing=[28,48];var rc=[36];
+    function toothClass(n){if(missing.includes(n))return 'missing';if(crown.includes(n))return 'crown';if(rc.includes(n))return 'root-canal';if(treated.includes(n))return 'treated';return '';}
+    html=`<div class="page-header"><div class="page-title">Digital Odontogram</div><div class="page-sub">Meera Sharma · Click a tooth to log treatment</div></div>
+    <div class="card">
+      <div class="card-title">Tooth Chart — Full Mouth</div>
+      <div style="display:flex;gap:16px;flex-wrap:wrap;margin-bottom:12px;font-size:11px">
+        <span><span style="display:inline-block;width:12px;height:12px;border-radius:3px;background:#C0DD97;border:1px solid #639922;margin-right:4px;vertical-align:middle"></span>Treated</span>
+        <span><span style="display:inline-block;width:12px;height:12px;border-radius:3px;background:#FAC775;border:1px solid #BA7517;margin-right:4px;vertical-align:middle"></span>Crown</span>
+        <span><span style="display:inline-block;width:12px;height:12px;border-radius:3px;background:#F1EFE8;border:1px solid #B4B2A9;margin-right:4px;vertical-align:middle"></span>Missing</span>
+        <span><span style="display:inline-block;width:12px;height:12px;border-radius:3px;background:#F5C4B3;border:1px solid #D85A30;margin-right:4px;vertical-align:middle"></span>Root Canal</span>
+        <span><span style="display:inline-block;width:12px;height:12px;border-radius:3px;background:var(--color-background-primary);border:1px solid var(--color-border-secondary);margin-right:4px;vertical-align:middle"></span>Healthy</span>
+      </div>
+      <div class="odontogram">
+        <div style="font-size:10px;color:var(--color-text-secondary);margin-bottom:4px">— Upper Arch —</div>
+        <div class="teeth-row">${upper.map(n=>`<div><div class="tooth ${toothClass(n)}" title="Tooth ${n}">${n}</div></div>`).join('')}</div>
+        <div style="height:8px"></div>
+        <div class="teeth-row">${lower.map(n=>`<div><div class="tooth ${toothClass(n)}" title="Tooth ${n}">${n}</div></div>`).join('')}</div>
+        <div style="font-size:10px;color:var(--color-text-secondary);margin-top:4px">— Lower Arch —</div>
+      </div>
+      <div class="divider"></div>
+      <div class="card-title" style="margin-bottom:10px">Selected Tooth: <span style="color:#185FA5">#26 — Root Canal Completed</span></div>
+      <div class="two-col">
+        <div class="form-group"><label>Procedure</label><select><option>Root Canal Treatment</option><option>Filling</option><option>Crown</option><option>Extraction</option><option>Implant</option></select></div>
+        <div class="form-group"><label>Status</label><select><option>Completed</option><option>In Progress</option><option>Planned</option></select></div>
+      </div>
+      <div class="form-group"><label>Notes</label><input type="text" value="Root canal completed, post and core placed, crown recommended." /></div>
+      <button class="btn btn-primary btn-sm">Update Tooth Record</button>
+    </div>`;
+  } else if(tab==='prescriptions'){
+    html=`<div class="page-header"><div class="page-title">Prescriptions</div><div class="page-sub">Generate and manage patient prescriptions</div></div>
+    <div class="two-col">
+      <div class="card">
+        <div class="card-title">New Prescription — Meera Sharma</div>
+        <div style="font-size:12px;color:var(--color-text-secondary);margin-bottom:12px">10 April 2026 · Root Canal #26 · Dr. Kulkarni</div>
+        <div class="form-group"><label>Search Medication</label><input type="text" placeholder="Type drug name..." value="Amoxicillin" /></div>
+        <div style="background:var(--color-background-secondary);border-radius:8px;padding:8px;margin-bottom:12px;font-size:12px">
+          <div style="font-weight:500;margin-bottom:4px">Search results</div>
+          ${['Amoxicillin 500mg','Amoxicillin-Clavulanate 625mg','Amoxicillin 250mg Syrup'].map(d=>`<div style="padding:5px 8px;border-radius:6px;cursor:pointer;hover:background:red">${d}</div>`).join('')}
+        </div>
+        <div class="card-title" style="font-size:13px;margin-bottom:8px">Current Prescription</div>
+        <div class="prescription-item">
+          <div class="rx-name">Amoxicillin 500mg</div>
+          <div class="rx-dose">1-0-1 × 5 days</div>
+          <button class="btn btn-danger btn-sm">×</button>
+        </div>
+        <div class="prescription-item">
+          <div class="rx-name">Ibuprofen 400mg</div>
+          <div class="rx-dose">1-1-1 × 3 days (after food)</div>
+          <button class="btn btn-danger btn-sm">×</button>
+        </div>
+        <div class="prescription-item">
+          <div class="rx-name">Clindamycin 300mg</div>
+          <div class="rx-dose">1-0-1 × 5 days</div>
+          <button class="btn btn-danger btn-sm">×</button>
+        </div>
+        <div class="alert-box alert-warning" style="margin-top:10px">⚠ Patient allergic to Penicillin — verify prescriptions</div>
+        <div style="display:flex;gap:8px;margin-top:12px">
+          <button class="btn btn-primary">Generate PDF Prescription</button>
+          <button class="btn">Send via WhatsApp</button>
+        </div>
+      </div>
+      <div class="card"><div class="card-title">Past Prescriptions</div>
+        ${[
+          {date:'14 Feb 2026',meds:'Ibuprofen 400mg, Chlorhexidine mouthwash',proc:'Post-Scaling'},
+          {date:'03 Nov 2025',meds:'Amoxicillin 500mg, Metronidazole 400mg',proc:'Post-Filling'},
+          {date:'21 Jul 2025',meds:'No medication prescribed',proc:'OPG X-ray'},
+        ].map(rx=>`<div style="padding:10px 0;border-bottom:0.5px solid var(--color-border-tertiary)">
+          <div style="display:flex;justify-content:space-between;margin-bottom:3px"><div style="font-weight:500;font-size:12px">${rx.proc}</div><div style="font-size:11px;color:var(--color-text-secondary)">${rx.date}</div></div>
+          <div style="font-size:12px;color:var(--color-text-secondary)">${rx.meds}</div>
+          <button class="btn btn-sm" style="margin-top:6px;font-size:11px;padding:3px 10px">Reprint</button>
+        </div>`).join('')}
+      </div>
+    </div>`;
+  }
+  document.getElementById('dent-content').innerHTML=html;
+}
+
+function renderAdmin(){
+  var tab=currentAdminTab;
+  var html='';
+  var users=[
+    {name:'Dr. Ramesh Kulkarni',role:'Dentist',email:'r.kulkarni@dental.in',status:'Active',last:'10 Apr 2026'},
+    {name:'Dr. Anita Nair',role:'Dentist',email:'a.nair@dental.in',status:'Active',last:'09 Apr 2026'},
+    {name:'Supriya Rao',role:'Receptionist',email:'s.rao@dental.in',status:'Active',last:'10 Apr 2026'},
+    {name:'Neha Kulkarni',role:'Receptionist',email:'n.kulkarni@dental.in',status:'On Leave',last:'05 Apr 2026'},
+    {name:'Admin User',role:'Admin',email:'admin@dental.in',status:'Active',last:'10 Apr 2026'},
+  ];
+  if(tab==='users'){
+    html=`<div class="page-header"><div class="page-title">User Management</div><div class="page-sub">Manage staff roles and access permissions (RBAC)</div></div>
+    <div class="card" style="margin-bottom:16px">
+      <div class="card-title">Add New User</div>
+      <div class="three-col">
+        <div class="form-group"><label>Full Name</label><input type="text" placeholder="Staff name" /></div>
+        <div class="form-group"><label>Email</label><input type="email" placeholder="Email address" /></div>
+        <div class="form-group"><label>Role</label><select><option>Dentist</option><option>Receptionist</option><option>Admin</option></select></div>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-primary btn-sm">Add User</button>
+        <button class="btn btn-sm">Send Invite</button>
+      </div>
+    </div>
+    <div class="card" style="padding:0;overflow:hidden">
+      <div style="padding:14px 20px 10px"><div style="font-size:14px;font-weight:500">Staff Directory</div></div>
+      ${users.map(u=>`<div class="user-row">
+        <div class="user-avatar ${u.role==='Dentist'?'ua-blue':u.role==='Receptionist'?'ua-green':'ua-purple'}">${u.name.split(' ').slice(-1)[0][0]}${u.name.split(' ')[0][0]}</div>
+        <div style="flex:1">
+          <div style="font-weight:500;font-size:13px">${u.name}</div>
+          <div style="font-size:11px;color:var(--color-text-secondary)">${u.email}</div>
+        </div>
+        <span class="badge ${u.role==='Dentist'?'badge-blue':u.role==='Admin'?'badge-gray':'badge-green'}" style="margin-right:12px">${u.role}</span>
+        <span class="badge ${u.status==='Active'?'badge-green':'badge-amber'}" style="margin-right:12px">${u.status}</span>
+        <div style="font-size:11px;color:var(--color-text-secondary);margin-right:12px">Last: ${u.last}</div>
+        <button class="btn btn-sm">Edit</button>
+      </div>`).join('')}
+    </div>`;
+  } else if(tab==='analytics'){
+    html=`<div class="page-header"><div class="page-title">Analytics Dashboard</div><div class="page-sub">Clinic performance — April 2026</div></div>
+    <div class="cards-row">
+      <div class="metric-card"><div class="metric-label">Total Patients (Apr)</div><div class="metric-value">87</div><div class="metric-change" style="color:#3B6D11">↑ 14% vs March</div></div>
+      <div class="metric-card"><div class="metric-label">Revenue (Apr)</div><div class="metric-value">₹1.84L</div><div class="metric-change" style="color:#3B6D11">↑ 8% vs March</div></div>
+      <div class="metric-card"><div class="metric-label">New Registrations</div><div class="metric-value">24</div><div class="metric-change" style="color:#3B6D11">↑ 4 from last month</div></div>
+      <div class="metric-card"><div class="metric-label">Avg. Bill / Patient</div><div class="metric-value">₹2,115</div><div class="metric-change" style="color:var(--color-text-secondary)">Stable</div></div>
+    </div>
+    <div class="two-col">
+      <div class="card"><div class="card-title">Patients by Procedure</div>
+        <div class="chart-bar-wrap">
+          ${[['Root Canal',42],['Scaling',28],['Extraction',18],['Crown',14],['Braces',10],['Implant',6]].map(([l,v])=>`
+          <div class="chart-bar-row">
+            <div class="chart-bar-label" style="width:80px">${l}</div>
+            <div class="chart-bar-bg"><div class="chart-bar-fill" style="width:${Math.round(v/42*100)}%;background:#378ADD">${v}</div></div>
+            <div class="chart-bar-val">${v}</div>
+          </div>`).join('')}
+        </div>
+      </div>
+      <div class="card"><div class="card-title">Monthly Revenue Trend (₹)</div>
+        <div class="chart-bar-wrap">
+          ${[['Nov','1.2L',60],['Dec','1.4L',70],['Jan','1.6L',80],['Feb','1.5L',75],['Mar','1.7L',85],['Apr','1.84L',92]].map(([m,v,pct])=>`
+          <div class="chart-bar-row">
+            <div class="chart-bar-label" style="width:36px">${m}</div>
+            <div class="chart-bar-bg"><div class="chart-bar-fill" style="width:${pct}%;background:#185FA5">${v}</div></div>
+          </div>`).join('')}
+        </div>
+        <div class="divider"></div>
+        <div style="display:flex;gap:16px;font-size:12px">
+          <div><span style="color:var(--color-text-secondary)">6-Month Total: </span><strong>₹9.24L</strong></div>
+          <div><span style="color:var(--color-text-secondary)">Growth: </span><strong style="color:#3B6D11">+53%</strong></div>
+        </div>
+      </div>
+    </div>
+    <div class="card"><div class="card-title">Doctor Performance</div>
+      <table>
+        <thead><tr><th>Doctor</th><th>Patients</th><th>Procedures</th><th>Revenue</th><th>Avg. Rating</th><th>Utilization</th></tr></thead>
+        <tbody>
+          <tr><td style="font-weight:500">Dr. Kulkarni</td><td>52</td><td>Root Canal, Crown, Scaling</td><td style="color:#3B6D11">₹1.12L</td><td>⭐ 4.8</td><td><div class="progress-bar"><div class="progress-fill" style="width:87%;background:#185FA5"></div></div><div style="font-size:11px;margin-top:2px">87%</div></td></tr>
+          <tr><td style="font-weight:500">Dr. Nair</td><td>35</td><td>Braces, Extraction, Implant</td><td style="color:#3B6D11">₹72,000</td><td>⭐ 4.6</td><td><div class="progress-bar"><div class="progress-fill" style="width:70%;background:#378ADD"></div></div><div style="font-size:11px;margin-top:2px">70%</div></td></tr>
+        </tbody>
+      </table>
+    </div>`;
+  } else if(tab==='revenue'){
+    html=`<div class="page-header"><div class="page-title">Revenue Management</div><div class="page-sub">Financial overview and outstanding collections</div></div>
+    <div class="cards-row">
+      <div class="metric-card"><div class="metric-label">Gross Revenue</div><div class="metric-value">₹9.24L</div><div class="metric-change" style="color:var(--color-text-secondary)">Last 6 months</div></div>
+      <div class="metric-card"><div class="metric-label">Collected</div><div class="metric-value" style="color:#3B6D11">₹8.71L</div></div>
+      <div class="metric-card"><div class="metric-label">Outstanding</div><div class="metric-value" style="color:#A32D2D">₹53,000</div></div>
+      <div class="metric-card"><div class="metric-label">Collection Rate</div><div class="metric-value">94.3%</div><div class="metric-change" style="color:#3B6D11">↑ 2.1%</div></div>
+    </div>
+    <div class="card"><div class="card-title">Outstanding Invoices</div>
+      <table>
+        <thead><tr><th>Invoice</th><th>Patient</th><th>Procedure</th><th>Due Amount</th><th>Due Since</th><th>Action</th></tr></thead>
+        <tbody>
+          <tr><td style="color:#185FA5">INV-2028</td><td>Sunita Joshi</td><td>Extraction</td><td style="color:#A32D2D">₹1,500</td><td>09 Apr 2026</td><td><button class="btn btn-sm btn-primary">Send Reminder</button></td></tr>
+          <tr><td style="color:#185FA5">INV-2030</td><td>Priya Nair</td><td>Braces</td><td style="color:#A32D2D">₹25,000</td><td>07 Apr 2026</td><td><button class="btn btn-sm btn-primary">Send Reminder</button></td></tr>
+          <tr><td style="color:#185FA5">INV-2027</td><td>Rahul Patil</td><td>Scaling</td><td style="color:#A32D2D">₹1,200</td><td>10 Apr 2026</td><td><button class="btn btn-sm btn-primary">Send Reminder</button></td></tr>
+        </tbody>
+      </table>
+    </div>`;
+  }
+  document.getElementById('admin-content').innerHTML=html;
+}
+
+switchDashboard('receptionist');
+</script>
