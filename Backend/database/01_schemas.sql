@@ -3,15 +3,15 @@
 -- ==========================================
 CREATE TYPE user_role AS ENUM ('doctor', 'receptionist', 'admin');
 CREATE TYPE appointment_status AS ENUM ('scheduled', 'in_progress', 'completed', 'cancelled');
+CREATE TYPE treatment_status AS ENUM ('planned', 'in_progress', 'completed', 'cancelled');
 CREATE TYPE invoice_status AS ENUM ('draft', 'unpaid', 'partial', 'paid');
 
 -- ==========================================
--- 1. USERS (The Clinic Staff)
+-- 1. USERS (Auth Profiles)
 -- ==========================================
 CREATE TABLE users (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
     email VARCHAR(255) UNIQUE NOT NULL,
-    password_hash VARCHAR(255) NOT NULL,
     first_name VARCHAR(100) NOT NULL,
     last_name VARCHAR(100) NOT NULL,
     role user_role NOT NULL,
@@ -52,9 +52,12 @@ CREATE TABLE appointments (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     patient_id UUID REFERENCES patients(id) ON DELETE CASCADE,
     doctor_id UUID REFERENCES users(id),
-    appointment_time TIMESTAMP WITH TIME ZONE NOT NULL,
+    start_time TIMESTAMP WITH TIME ZONE NOT NULL,
+    end_time TIMESTAMP WITH TIME ZONE NOT NULL,
+    appointment_time TIMESTAMP WITH TIME ZONE,
     reason_for_visit TEXT,
     status appointment_status DEFAULT 'scheduled',
+    CHECK (start_time < end_time),
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
@@ -70,6 +73,7 @@ CREATE TABLE treatments (
     procedure_name VARCHAR(255) NOT NULL,
     clinical_notes TEXT,
     procedure_cost DECIMAL(10, 2) NOT NULL, -- Base cost of the procedure for billing
+    status treatment_status DEFAULT 'planned',
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
@@ -79,10 +83,13 @@ CREATE TABLE treatments (
 CREATE TABLE invoices (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     patient_id UUID REFERENCES patients(id) ON DELETE CASCADE,
-    appointment_id UUID UNIQUE REFERENCES appointments(id), -- 1:1 relationship per visit
+    appointment_id UUID REFERENCES appointments(id),
+    treatment_id UUID UNIQUE REFERENCES treatments(id) ON DELETE CASCADE,
     total_amount DECIMAL(10, 2) NOT NULL DEFAULT 0.00,
     discount DECIMAL(10, 2) DEFAULT 0.00,
     net_amount DECIMAL(10, 2) GENERATED ALWAYS AS (total_amount - discount) STORED,
+    paid_amount DECIMAL(10, 2) NOT NULL DEFAULT 0.00,
+    remaining_balance DECIMAL(10, 2) NOT NULL DEFAULT 0.00,
     status invoice_status DEFAULT 'draft',
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
@@ -99,4 +106,18 @@ CREATE TABLE payments (
     payment_method VARCHAR(50), -- 'Cash', 'UPI', 'Card'
     processed_by UUID REFERENCES users(id), -- Which receptionist collected the money
     payment_date TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- ==========================================
+-- 8. PRESCRIPTIONS (Post-Treatment Medication Plans)
+-- ==========================================
+CREATE TABLE prescriptions (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    patient_id UUID NOT NULL REFERENCES patients(id) ON DELETE CASCADE,
+    doctor_id UUID NOT NULL REFERENCES users(id),
+    treatment_id UUID NOT NULL UNIQUE REFERENCES treatments(id) ON DELETE CASCADE,
+    medicines JSONB NOT NULL DEFAULT '[]'::jsonb,
+    dosage TEXT NOT NULL,
+    instructions TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
